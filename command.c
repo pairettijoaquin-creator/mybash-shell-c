@@ -72,6 +72,7 @@ scommand scommand_destroy(scommand self){
     free(self->input);                   // además libero el resto de elementos de scommand
     free(self->output);
     free(self);
+    
    
     return self;
 }
@@ -93,9 +94,89 @@ void scommand_push_back(scommand self, char * argument){
 
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
-/*
- * 
- */
 
 }
 
+void scommand_set_redir_in(scommand self, char * filename){
+    assert(self!=NULL);
+}
+
+void scommand_set_redir_out(scommand self, char * filename){
+    assert(self!=NULL);
+}
+
+/* no sé que cambia que sea constante, 
+ * voy a suponer que es lo mismo que si no estuviera ahí
+ * después lo cambio si está mal, es para tener de base
+ */
+
+bool scommand_is_empty(const scommand self){
+    assert(self!=NULL);
+return (self->length != 0);
+}
+
+unsigned int scommand_length(const scommand self){
+    assert(self!=NULL);
+return (self->length);
+}
+
+char * scommand_front(const scommand self){
+    assert(self!=NULL && !scommand_is_empty(self));
+}
+
+char * scommand_get_redir_in(const scommand self){
+    assert(self!=NULL);
+}
+char * scommand_get_redir_out(const scommand self){
+    assert(self!=NULL);
+}
+
+char * scommand_to_string(const scommand self){
+    assert(self!=NULL);
+}
+
+
+
+////////////////pipeline///////////////////////////////////
+
+
+
+pipeline pipeline_new(void){
+
+}
+
+pipeline pipeline_destroy(pipeline self){
+    assert(self != NULL);
+}
+
+void pipeline_push_back(pipeline self, scommand sc){
+    assert(self!=NULL && sc!=NULL);
+}
+
+void pipeline_pop_front(pipeline self){
+    assert(self!=NULL && !pipeline_is_empty(self));
+}
+
+void pipeline_set_wait(pipeline self, const bool w){
+    assert(self!=NULL);
+}
+
+bool pipeline_is_empty(const pipeline self){
+    assert(self!=NULL);
+}
+
+unsigned int pipeline_length(const pipeline self){
+    assert(self!=NULL);
+}
+
+scommand pipeline_front(const pipeline self){
+    assert(self!=NULL && !pipeline_is_empty(self));
+}
+
+bool pipeline_get_wait(const pipeline self){
+    assert(self!=NULL);
+}
+
+char * pipeline_to_string(const pipeline self){
+    assert(self!=NULL);
+}
