@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <glib2.0/glib.h>
+#include <assert.h>
 
 #include "command.h"
 
@@ -23,6 +24,7 @@
 
 struct scommand_s {
     GList* arg;   // comando/argumento
+    unsigned int length;  // cantidad de argumentos
     char* input;  // archivo de entrada (si es necesario)
     char* output; // archivo de salida (si es necesario)
 };
@@ -48,6 +50,7 @@ scommand scommand_new(void){
         self->arg = NULL;
         self->input = NULL;
         self->output = NULL;
+        self->length = 0;
     return self;
 }
 
@@ -63,10 +66,13 @@ scommand scommand_destroy(scommand self){
  * 
  * void g_list_free_full (GList* list, GDestroyNotify free_func)
  * toma un puntero de tipo glist (en este caso self->arg)
- * usa g_free para cada arg de glist
+ *
  */
-
-    g_list_free_full(self->arg, g_free);
+    g_list_free_full(self->arg, g_free); // usa g_free para cada arg de glist
+    free(self->input);                   // además libero el resto de elementos de scommand
+    free(self->output);
+    free(self);
+   
     return self;
 }
 
@@ -82,16 +88,14 @@ void scommand_push_back(scommand self, char * argument){
  */
 
  self->arg = g_list_append (self->arg, argument);
+ self->length = self->length+1;
 }
 
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
 /*
- * se quiere quitar el primer arg de la lista
- * para ello existe:
- * GList* g_list_delete_link (GList* list, GList* link_)
- * donde list es self->arg y link_ el elemento que se quiere eliminar
  * 
  */
 
 }
+
