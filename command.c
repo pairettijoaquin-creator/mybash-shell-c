@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <glib2.0/glib.h>
+#include <glib.h>
 #include <assert.h>
 
 #include "command.h"
@@ -69,9 +69,9 @@ scommand scommand_destroy(scommand self){
  *
  */
     g_list_free_full(self->arg, g_free); // usa g_free para cada arg de glist
-    free(self->input);                   // además libero el resto de elementos de scommand
-    free(self->output);
-    free(self);
+    g_free(self->input);                   // además libero el resto de elementos de scommand
+    g_free(self->output);
+    g_free(self);
     
    
     return self;
@@ -92,6 +92,8 @@ void scommand_push_back(scommand self, char * argument){
  self->length = self->length+1;
 }
 
+
+/* está mal hecha*/
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
 /*
@@ -103,7 +105,7 @@ void scommand_pop_front(scommand self){
  * es decir self->arg->data (data viene de la def de glist)
  * 
 */
-link = self->aeg->data;
+scommand link = self->arg->data;
 self->arg = g_list_remove_link(self->arg, link);
 
 }
@@ -117,11 +119,6 @@ void scommand_set_redir_out(scommand self, char * filename){
     assert(self!=NULL);
     self->output= filename; // establezco filename como output
 }
-
-/* no sé que cambia que sea constante, 
- * voy a suponer que es lo mismo que si no estuviera ahí
- * después lo cambio si está mal, es para tener de base
- */
 
 bool scommand_is_empty(const scommand self){
     assert(self!=NULL);
@@ -137,8 +134,6 @@ return self->length;
 char * scommand_front(const scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
 
-
-
 }
 
 char * scommand_get_redir_in(const scommand self){
@@ -152,9 +147,7 @@ return self->output;
 }
 
 char * scommand_to_string(const scommand self){
-    assert(self!=NULL);
- 
-
+    assert(self!=NULL); 
 
 }
 
