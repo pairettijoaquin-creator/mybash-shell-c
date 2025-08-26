@@ -46,7 +46,7 @@ scommand scommand_new(void){
         
         if (self == NULL) {
     return NULL; 
-
+        }
         self->arg = NULL;
         self->input = NULL;
         self->output = NULL;
@@ -94,15 +94,28 @@ void scommand_push_back(scommand self, char * argument){
 
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
+/*
+ *quita el primer arg (cmd)
+ * uso GList* g_list_delete_link (GList* list,  GList* link_)
+ * que remueve el nodo "_link" y liberra su memoria
+ * 
+ * busco que _link sea el primer nodo
+ * es decir self->arg->data (data viene de la def de glist)
+ * 
+*/
+link = self->aeg->data;
+self->arg = g_list_remove_link(self->arg, link);
 
 }
 
 void scommand_set_redir_in(scommand self, char * filename){
     assert(self!=NULL);
+    self->input= filename; // establezco filename como input
 }
 
 void scommand_set_redir_out(scommand self, char * filename){
     assert(self!=NULL);
+    self->output= filename; // establezco filename como output
 }
 
 /* no sé que cambia que sea constante, 
@@ -112,27 +125,37 @@ void scommand_set_redir_out(scommand self, char * filename){
 
 bool scommand_is_empty(const scommand self){
     assert(self!=NULL);
-return (self->length != 0);
+return self->length != 0;
 }
+
 
 unsigned int scommand_length(const scommand self){
     assert(self!=NULL);
-return (self->length);
+return self->length;
 }
 
 char * scommand_front(const scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
+
+
+
 }
 
 char * scommand_get_redir_in(const scommand self){
     assert(self!=NULL);
+return self->input; 
 }
+
 char * scommand_get_redir_out(const scommand self){
     assert(self!=NULL);
+return self->output;
 }
 
 char * scommand_to_string(const scommand self){
     assert(self!=NULL);
+ 
+
+
 }
 
 
