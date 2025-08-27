@@ -122,7 +122,7 @@ void scommand_set_redir_out(scommand self, char * filename){
 
 bool scommand_is_empty(const scommand self){
     assert(self!=NULL);
-return self->length != 0;
+return self->length == 0;
 }
 
 
@@ -155,34 +155,64 @@ char * scommand_to_string(const scommand self){
 
 ////////////////pipeline///////////////////////////////////
 
+struct pipeline_s{
+    Glist* p_arg;
+    unsigned int length;
+    bool nowait;  
 
+/* "nowait" es false cuando un comando se sigue ejecutando
+ * en segundo plano y se permite acceder a otro nuevo,
+ * y es true cuando no se ejecuta en segundo plano
+ */
 
-pipeline pipeline_new(void){
+}
 
+/* las implementaciones son similares a las de scommand,
+ * solamente habría que cambiar los argumentos cuando sea necesario
+ */
+
+pipeline pipeline_new(void){}
+    pipeline self = NULL;
+    self = malloc(sizeof(struct pipeline_s));
+
+    self->p_arg=NULL;
+    self->length=0;
+    self->nowait=true;
+return self;
 }
 
 pipeline pipeline_destroy(pipeline self){
     assert(self != NULL);
+
+
 }
 
 void pipeline_push_back(pipeline self, scommand sc){
     assert(self!=NULL && sc!=NULL);
+ self->p_arg = g_list_append (self->arg, sc);
+ self->length = self->length+1;
+
 }
 
 void pipeline_pop_front(pipeline self){
     assert(self!=NULL && !pipeline_is_empty(self));
+
+
 }
 
 void pipeline_set_wait(pipeline self, const bool w){
     assert(self!=NULL);
+    self->nowait=w;
 }
 
 bool pipeline_is_empty(const pipeline self){
     assert(self!=NULL);
+return self->length == 0;
 }
 
 unsigned int pipeline_length(const pipeline self){
     assert(self!=NULL);
+return self->length;
 }
 
 scommand pipeline_front(const pipeline self){
@@ -191,6 +221,7 @@ scommand pipeline_front(const pipeline self){
 
 bool pipeline_get_wait(const pipeline self){
     assert(self!=NULL);
+ return self->nowait;
 }
 
 char * pipeline_to_string(const pipeline self){
