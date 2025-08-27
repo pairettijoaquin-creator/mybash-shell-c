@@ -93,7 +93,6 @@ void scommand_push_back(scommand self, char * argument){
 }
 
 
-/* está mal hecha*/
 void scommand_pop_front(scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
 /*
@@ -103,11 +102,12 @@ void scommand_pop_front(scommand self){
  * 
  * busco que _link sea el primer nodo
  * es decir self->arg->data (data viene de la def de glist)
- * 
+ * entonces defino un puntero (con gpointer de tipo void*)
+ * que apunta a self->arg->data
+ * y luego se borra con  g_list_remove_link
 */
-scommand link = self->arg->data;
+gpointer link = self->arg->data;
 self->arg = g_list_remove_link(self->arg, link);
-
 }
 
 void scommand_set_redir_in(scommand self, char * filename){
@@ -133,7 +133,13 @@ return self->length;
 
 char * scommand_front(const scommand self){
     assert(self!=NULL && !scommand_is_empty(self));
-
+/*
+* entiendo que se refiere a devolver el primer elemento 
+* siguiendo el cuadro de referencia del principio de command.h
+* se estaría hablando de "cmd"
+* o sea, devuelve self->arg->data
+*/
+return self->arg->data;
 }
 
 char * scommand_get_redir_in(const scommand self){
