@@ -42,15 +42,16 @@ struct scommand_s {
 
 scommand scommand_new(void){
     scommand self = NULL;
-        self = malloc(sizeof(struct scommand_s));
+    self = malloc(sizeof(struct scommand_s));
         
-        if (self == NULL) {
-    return NULL; 
-        }
-        self->arg = NULL;
-        self->input = NULL;
-        self->output = NULL;
-        self->length = 0;
+    if (self == NULL) {
+        return NULL; 
+    }
+
+    self->arg = NULL;
+    self->input = NULL;
+    self->output = NULL;
+    self->length = 0;
     return self;
 }
 
@@ -93,21 +94,21 @@ void scommand_push_back(scommand self, char * argument){
 }
 
 
-void scommand_pop_front(scommand self){
-    assert(self!=NULL && !scommand_is_empty(self));
-/*
- *quita el primer arg (cmd)
- * uso GList* g_list_delete_link (GList* list,  GList* link_)
- * que remueve el nodo "_link" y liberra su memoria
- * 
- * busco que _link sea el primer nodo
- * es decir self->arg->data (data viene de la def de glist)
- * entonces defino un puntero (con gpointer de tipo void*)
- * que apunta a self->arg->data
- * y luego se borra con  g_list_remove_link
-*/
-gpointer link = self->arg->data;
-self->arg = g_list_remove_link(self->arg, link);
+void scommand_pop_front(scommand self) {
+    assert(self != NULL && !scommand_is_empty(self));
+    //chequeo el invariante o sea si self apunta a un comando y self no es vacio, es decir tiene alguin nodo
+    
+    GList *first = self->arg;          // el nodo a borrar 
+    char *arg0 = first->data;          // el dato del nodo (ej, "ls" de tipo char*)
+
+    // liberar el dato que fue alocado dinámicamente
+    free(arg0);                        //borro ls
+
+    // libero el nodo, una vez que ya libere el dato aloojado dinamicamente
+    self->arg = g_list_delete_link(self->arg, first);
+
+    // mantener invariante de tamaño
+    self->length -= 1;
 }
 
 void scommand_set_redir_in(scommand self, char * filename){
@@ -206,6 +207,10 @@ struct pipeline_s {
 pipeline pipeline_new(void) {
     pipeline p = malloc(sizeof(struct pipeline_s));
     assert(p != NULL);
+       
+    if (p == NULL) {
+        return NULL; 
+    }
 
     p->command = NULL;
     p->wait = true;     // por defecto foreground
@@ -216,15 +221,17 @@ pipeline pipeline_new(void) {
     return p;
 }
 
-pipeline pipeline_destroy(pipeline self){
+pipeline pipeline_destroy(pipeline self) {
     assert(self != NULL);
-    g_list_free_full(self->command, scommand_destroy);
-    free(self);
-    
-    self = NULL;
-    return self;
-}
 
+    for (GList *n = self->command; n != NULL ; n = n->next) {
+        scommand_destroy(n->data);
+    }
+
+    g_list_free(self->command);
+    free(self);
+    return NULL;
+}
 
 /// modificadores ///
 
@@ -239,13 +246,14 @@ void pipeline_pop_front(pipeline self) {
     assert(self!=NULL && !pipeline_is_empty(self));
 
     GList* first = self->command;          // el nodo a borrar 
-    scommand sc = first->data;         // dato del nodo: un scommand*
+    scommand sc = first->data;         // dato del nodo: un scommand
 
-    pipeline_destroy(sc);
+    scommand_destroy(sc);
 
     self->command = g_list_delete_link(self->command, first); // nueva cabeza
     self->length -= 1;
 }
+
 
 void pipeline_set_wait(pipeline self, const bool w) {
     assert(self!=NULL);
