@@ -7,42 +7,6 @@
 
 #include "command.h"
 
-/* comienzo con los comandos internos (cd, help, exit)*/
-
-
-/* void builtin_cd(scommand comando){
-   if (comando->arg->data == NULL){  // se ve si el comando es vacío
-        chdir(no sé);
-    } else {
-       chdir()}    // si no es vacío, se ve el input
-
-    }
-*/
-
-
-
-
-void builtin_help(void){
-char * helptxt = NULL;
-    helptxt = 
-    
-    /*
-    * nombres: .....
-    *
-    *
-    * comandos: 
-    *   cd = cambia el directorio actual al espeficado
-        help = imprime comandos disponibles y nombres de los autores
-        exit = termina el proceso
-    */
-
-    printf("%s", helptxt);
-}
-
-void builtin_exit(void){
-    exit(EXIT_SUCCESS);
-}
-
 
 bool builtin_is_internal(scommand cmd){
 assert(cmd != NULL);
@@ -53,25 +17,27 @@ return strcmp(scommand_front(cmd), "cd") == 0 || strcmp(scommand_front(cmd), "he
 bool builtin_alone(pipeline p){
 assert(p != NULL);
 
-assert(builtin_alone(p) == pipeline_length(p) == 1 && builtin_is_internal(pipeline_front(p)));
+return(builtin_alone(p) == pipeline_length(p) == 1 && builtin_is_internal(pipeline_front(p)));
 }
 
 
 void builtin_run(scommand cmd){
     assert{builtin_is_internal(cmd);
-    
-    /* acá sería ver cual comando es y usar las void builtin_(comando interno)
-    * sería algo como 
 
         if (strcmp(scommand_front(cmd), "help") {
-        builtin_help();
+            printf("Shell "MyBash"\n");
+            printf("integrantes:\n\n Bosque Lissandro\n Galassi Franco \n Ortega Maximo\n Pairetti Joaquín");
+            printf("Comandos:\n\n"cd" = cambia el directorio actual al espeficado\n"help" = imprime comandos disponibles y nombres de los autores\n"exit" = termina el proceso");
+
        } else if (strcmp(scommand_front(cmd), "exit") {
-        builtin_exit();
+        exit(EXIT_SUCCESS);
         } else if (strcmp(scommand_front(cmd), "cd") {
-         builtin_cd(cmd);
-    
-    *
-    */
-    
+            char* comando = NULL;
+            if (scommand_length(cmd)==2){
+                comando = g_list_nth_data(cmd->arg, 1)
+        }   else {
+                comando = chdir(getenv("HOME"));
+        }
+    }
 
 }
