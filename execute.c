@@ -55,7 +55,7 @@ void execute_pipeline(pipeline apipe) {
         
         unsigned int apipe_length = pipeline_length(apipe);
         
-        int pipe_filedes[2];   // guarda file descriptors de cada nuevo pipe
+        int pipe_filedes[2];   // guarda file descriptors de cada nuevo pipe (pipe_fildes[0]->lectura, pipe_fildes[1]->escritura)
         int temp[2];           // guarda el pipe anterior (entrada para el próximo comando)
 
         for (unsigned int i = 0; i < apipe_length; i++) {
@@ -75,16 +75,42 @@ void execute_pipeline(pipeline apipe) {
             int pid = fork();
 
             if (pid == 0) {
+                scommand cmd = pipeline_front(apipe);
+                pipeline_pop_front(apipe);
+
+                // si no es el primer comando conecto stdin con la salida del pipe anterior
+                if (i > 0) {
+                    dup2(temp[0], STDIN_FILENO);
+                    close(temp[0]);
+                    close(temp[1]);
+                }
+                
+                // si no es el ultimo comando conecto stdout al pipe actual
+                if (i < apipe_length - 1) {
+                    dup2(pipe_filedes[1], STDOUT_FILENO);
+                    close(pipe_filedes[1]);
+                    close(pipe_filedes[0]);
+                }
+                
+                // aplico las redirecciones
+                filedesc_redir_input(cmd);
+                filedesc_redir_output(cmd);
+
                 /*
-                *   proceso hijo
+                *  aca iria la ejecucion del cmd
+                *
+                * 
                 * 
                 */
+            
             } 
             else if (pid > 0) {
-                /*
-                *   proceso padre
-                * 
-                */
+                
+                if (i > 0) {
+                    close(temp[0]);
+                    close(temp[1]);
+                }
+                
             } 
             else {
                 // fork() falló
