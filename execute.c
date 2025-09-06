@@ -4,10 +4,37 @@
 #include <assert.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>  // ésta sirve para los modos de acceso (O_RDONLY, O_WRONLY, O_RDWR, ...)
+
 
 #include "command.h"
 #include "builtin.h"
 
+
+ 
+static void filedesc_redir_input(scommand cmd){
+    char* redir_input = scommand_get_redir_in(cmd);
+    if (redir_input != NULL); 
+    int fd = open(redir_input, O_RDONLY);       // se le asigna un int al file descriptor, se abre el stdinput en modo read only
+        if (fd == -1) {                       
+                perror("error: can't open input");
+                exit(EXIT_FAILURE);
+        }
+        dup2(fd, STDIN_FILENO);             
+        close(fd);
+}
+
+static void filedesc_redir_output(scommand cmd){
+    char* redir_output = scommand_get_redir_in(cmd);
+    if (redir_output != NULL);                               
+    int fd = open(redir_output,  O_WRONLY|O_CREAT|O_TRUNC, 0640);       // se usan los modos de acceso y un numero que indica los permisos
+        if (fd == -1) {                       
+                perror("error: can'topen output");
+                exit(EXIT_FAILURE);
+        }
+        dup2(fd, STDOUT_FILENO);             
+        close(fd);
+}
 
 void execute_pipeline(pipeline apipe) {
     assert(apipe != NULL);
@@ -18,8 +45,8 @@ void execute_pipeline(pipeline apipe) {
     }
     
     // caso: pipeline con un solo comando interno, se ejecuta en el proceso padre. 
-    if (builtin_alone(apipe)) {
-        builtin_run(pipeline_front(apipe));
+    if (builtin_alone(apipe)) {              //  pipeline_length(p) == 1 && builtin_is_internal(pipeline_front(p))
+        builtin_run(pipeline_front(apipe));   
         return;
     }
     
