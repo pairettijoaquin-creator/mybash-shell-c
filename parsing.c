@@ -15,8 +15,7 @@ static scommand parse_scommand(Parser p) {
         arg_kind_t kind;
         char *arg = parser_next_argument(p, &kind);
 
-        if (arg == NULL) {
-            // Encontró '|' o '\n' y NO los consumió: acá termina este scommand
+        if (arg == NULL) {                          // Encontró '|' o '\n' y NO los consumió: acá termina este scommand
             finish = true;
         } else if (kind == ARG_NORMAL) {
             if (sc == NULL) {sc = scommand_new();}
@@ -27,21 +26,23 @@ static scommand parse_scommand(Parser p) {
                 error = true; free(arg); 
             }
             else if (scommand_get_redir_in(sc) != NULL) {
-                 error = true; free(arg); 
+                error = true; free(arg); 
                 }
             else { 
                 scommand_set_redir_in(sc, arg); 
             }
         } else if (kind == ARG_OUTPUT) {
             if (sc == NULL) {
-                 error = true; free(arg); 
-                }
+                error = true;
+                free(arg); 
+            }
             else if (scommand_get_redir_out(sc) != NULL) {
-                 error = true; free(arg); 
-                }
+                error = true;
+                free(arg); 
+            }
             else {
-                 scommand_set_redir_out(sc, arg); 
-                }
+                scommand_set_redir_out(sc, arg); 
+            }
         }
     }
 
@@ -51,7 +52,6 @@ static scommand parse_scommand(Parser p) {
     }
     return sc;
 }
-
 
 pipeline parse_pipeline(Parser p) {
     assert(p != NULL);
@@ -76,7 +76,7 @@ pipeline parse_pipeline(Parser p) {
     parser_skip_blanks(p);
     bool background = false; 
     parser_op_background(p, &background);
-    pipeline_set_wait(result, !background);             // si hay & no espero, y viceversa
+    pipeline_set_wait(result, !background);     // si hay & no espero, y viceversa
 
     if (!parser_at_eof(p)) {
         bool gar = false;
