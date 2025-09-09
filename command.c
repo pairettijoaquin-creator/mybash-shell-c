@@ -73,11 +73,17 @@ void scommand_pop_front(scommand self) {
 
 void scommand_set_redir_in(scommand self, char * filename){
     assert(self!=NULL);
+    if (self->input != NULL) {
+        g_free(self->input);                   // libera la anterior
+    }
     self->input= filename; // establezco filename como input
 }
 
 void scommand_set_redir_out(scommand self, char * filename){
     assert(self!=NULL);
+    if (self->output != NULL) {
+        g_free(self->output);                  // libera la anterior
+    }
     self->output= filename; // establezco filename como output
 }
 
