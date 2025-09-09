@@ -7,14 +7,13 @@
 #include <unistd.h>
 #include "tests/syscall_mock.h"
 
-
 #include "command.h"
 #include "builtin.h"
 
 bool builtin_is_internal(scommand cmd) {
     assert(cmd != NULL);
     
-    if (scommand_is_empty(cmd)) return false;          // sin palabras, no es builtin
+    if (scommand_is_empty(cmd)) return false;                           // sin palabras, no es builtin
     const char* word = scommand_front(cmd);
     
     return (strcmp(word, "cd") == 0)  ||
@@ -28,11 +27,9 @@ bool builtin_alone(pipeline p){
     return pipeline_length(p) == 1 && builtin_is_internal(pipeline_front(p)); 
 }
 
-
-
 void builtin_run(scommand cmd){
     assert(builtin_is_internal(cmd));
-    const char* word = scommand_front(cmd);          //tomo el comando interno
+    const char* word = scommand_front(cmd);                             //tomo el comando interno
     
     if (strcmp(word, "help") == 0) {
         printf("Shell MyBash\n");
@@ -48,14 +45,13 @@ void builtin_run(scommand cmd){
 
         if (scommand_length(cmd) == 2) {
             scommand_pop_front(cmd);
-            path = scommand_front(cmd);              // 1er argumento
+            path = scommand_front(cmd);                                 // 1er argumento
 
         } else {
             const char* home = getenv("HOME");
-            path = (home != NULL && home[0] != '\0') ? home : "/";                      // si no hay HOME, ir a la raíz
+            path = (home != NULL && home[0] != '\0') ? home : "/";      // si no hay HOME, ir a la raíz
     
-
-            if (!scommand_is_empty(cmd)) {           // sobran argumentos
+            if (!scommand_is_empty(cmd)) {                              // sobran argumentos
                 fprintf(stderr, "cd: too many arguments\n");
                 too_many = true;
             }
