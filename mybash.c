@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "command.h"
 #include "execute.h"
@@ -11,7 +12,11 @@
 
 
 static void show_prompt(void) {
-    printf ("mybash> ");
+    char path[1000];
+    if(getcwd(path, sizeof(path)) == NULL){
+        perror("getcwd() error");
+    } 
+    printf ("mybash> %s$ ", path);
     fflush (stdout);
 }
 
