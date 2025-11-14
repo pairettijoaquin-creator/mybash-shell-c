@@ -16,11 +16,25 @@ static void show_prompt(void) {
     if(getcwd(path, sizeof(path)) == NULL){
         perror("getcwd() error");
     } 
-    printf ("mybash> %s$ ", path);
+
+    printf ("mybash> %s:\033[34m%s$ \033[0m",getenv("USER"), path);
     fflush (stdout);
 }
 
 int main(int argc, char *argv[]) {
+
+    printf("\n██████   ██████               ███████████                    █████     \n");
+    printf("░██████ ██████               ░░███░░░░░███                  ░░███      \n"); 
+    printf("░███░█████░███  █████ ████    ░███    ░███  ██████    █████  ░███████  \n");
+    printf("░███░░███ ░███ ░░███ ░███     ░██████████  ░░░░░███  ███░░   ░███░░███  \n");
+    printf("░███ ░░░  ░███  ░███ ░███     ░███░░░░░███  ███████ ░░█████  ░███ ░███ \n");
+    printf("░███      ░███  ░███ ░███     ░███    ░███ ███░░███  ░░░░███ ░███ ░███ \n");
+    printf("█████     █████ ░░███████     ███████████ ░░████████ ██████  ████ █████\n");
+    printf("░░░░░     ░░░░░   ░░░░░███    ░░░░░░░░░░░   ░░░░░░░░ ░░░░░░  ░░░░ ░░░░░ \n");
+    printf("                  ███ ░███                                              \n");
+    printf("                 ░░██████                                               \n");
+    printf("                  ░░░░░░                                                \n\n\n\n\n\n");
+
     pipeline pipe;
     Parser input;
     bool quit = false;
