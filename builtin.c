@@ -27,40 +27,86 @@ bool builtin_alone(pipeline p){
     return pipeline_length(p) == 1 && builtin_is_internal(pipeline_front(p)); 
 }
 
-void builtin_run(scommand cmd){
-    assert(builtin_is_internal(cmd));
-    const char* word = scommand_front(cmd);                             //tomo el comando interno
-    
-    if (strcmp(word, "help") == 0) {
-        printf("Shell MyBash\n");
-        printf("integrantes:\n Bosque Lissandro\n Galassi Franco \n Ortega Maximo\n Pairetti Joaquín\n");
-        printf("Comandos:\n cd = cambia el directorio actual al espeficado\nhelp = imprime comandos disponibles y nombres de los autores\nexit = termina el proceso\n");
-    
-    } else if (strcmp(word, "exit") == 0) {
+
+
+
+static void exit_run(void){
+    printf("\n\n"
+       "   █████████                        █████ █████                        \n"
+       "  ███▒▒▒▒▒███                      ▒▒███ ▒▒███                         \n"
+       " ███     ▒▒▒   ██████   ██████   ███████  ▒███████  █████ ████  ██████ \n"
+       "▒███          ███▒▒███ ███▒▒███ ███▒▒███  ▒███▒▒███▒▒███ ▒███  ███▒▒███\n"
+       "▒███    █████▒███ ▒███▒███ ▒███▒███ ▒███  ▒███ ▒███ ▒███ ▒███ ▒███████ \n"
+       "▒▒███  ▒▒███ ▒███ ▒███▒███ ▒███▒███ ▒███  ▒███ ▒███ ▒███ ▒███ ▒███▒▒▒  \n"
+       " ▒▒█████████ ▒▒██████ ▒▒██████ ▒▒████████ ████████  ▒▒███████ ▒▒██████ \n"
+       "  ▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒   ▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒ ▒▒▒▒▒▒▒▒    ▒▒▒▒▒███  ▒▒▒▒▒▒  \n"
+       "                                                     ███ ▒███          \n"
+       "                                                    ▒▒██████           \n"
+       "                                                     ▒▒▒▒▒▒            \n\n\n");
+
         exit(EXIT_SUCCESS);
-    
-    } else if (strcmp(word, "cd") == 0) {
+}
+
+
+// comandos internos disponibles e información de los autores
+static void help_run(void){
+printf("\n\n"
+       " █████   █████          ████           \n"
+       "░░███   ░░███          ░░███           \n"
+       " ░███    ░███   ██████  ░███  ████████ \n"
+       " ░███████████  ███░░███ ░███ ░░███░░███\n"
+       " ░███░░░░░███ ░███████  ░███  ░███ ░███\n"
+       " ░███    ░███ ░███░░░   ░███  ░███ ░███\n"
+       " █████   █████░░██████  █████ ░███████ \n"
+       "░░░░░   ░░░░░  ░░░░░░  ░░░░░  ░███░░░  \n"
+       "                              ░███     \n"
+       "                              █████    \n"
+       "                             ░░░░░     \n");
+
+
+        printf("Integrantes:\n    Bosque Lissandro\n    Galassi Franco\n    Ortega Maximo\n    Pairetti Joaquín\n");
+        printf("\nComandos:\n    [cd] = cambia el directorio actual al espeficado\n    [help] = imprime comandos disponibles y nombres de los autores\n    [exit] = termina el proceso\n\n");
+}
+
+
+//cambia el directorio actual
+static void cd_run(scommand cmd){
         const char* path = NULL;
         bool too_many = false;
 
-        if (scommand_length(cmd) == 2) {
-            scommand_pop_front(cmd);
-            path = scommand_front(cmd);                                 // 1er argumento
+                if (scommand_length(cmd) == 1){                            // si se pone unicamente cd, cambia el directorio a HOME
+                    const char* home = getenv("HOME");
+                    path = (home != NULL && home[0] != '\0') ? home : "/"; // si no hay HOME, ir a la raíz
+                }
+                else if (scommand_length(cmd) == 2) {                      // se elimina 1er argumento (cd) y se cambia el directorio a su argumento
+                    scommand_pop_front(cmd);
+                    path = scommand_front(cmd);      
 
-        } else {
-            const char* home = getenv("HOME");
-            path = (home != NULL && home[0] != '\0') ? home : "/";      // si no hay HOME, ir a la raíz
+                } else {                                                   // sobran argumentos, too_many se hace true                 
+                    fprintf(stderr, "cd: too many arguments\n");
+                    too_many = true;
+                }
+            
+                if (!too_many) {                                           // si too_many es true, da error
+                    if (chdir(path) != 0) {
+                        perror("cd");
+                    }
+                }
+            }
+
+
+void builtin_run(scommand cmd){
+    assert(builtin_is_internal(cmd));
+    const char* word = scommand_front(cmd);                             //analiza el comando interno, se ejecuta su función estática
     
-            if (!scommand_is_empty(cmd)) {                              // sobran argumentos
-                fprintf(stderr, "cd: too many arguments\n");
-                too_many = true;
-            }
-        }
-        if (!too_many) {
-            if (chdir(path) != 0) {
-                perror("cd");
-            }
-        }
+    if (strcmp(word, "help") == 0) {
+       help_run();
+
+    } else if (strcmp(word, "exit") == 0) {
+        exit_run();
+    
+    } else if (strcmp(word, "cd") == 0) {
+        cd_run(cmd);
     }
 }
 

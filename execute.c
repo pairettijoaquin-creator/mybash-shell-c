@@ -6,13 +6,15 @@
 #include <sys/wait.h>
 #include <fcntl.h>      // ésta sirve para los modos de acceso (O_RDONLY, O_WRONLY, O_RDWR, ...)
 #include <glib.h>
+#include <signal.h>     //
 
 #include "tests/syscall_mock.h"
 #include "command.h"
 #include "builtin.h"
 #include "execute.h"
 
-static void filedesc_redir_input(scommand cmd){
+
+static void filedesc_redir_input(scommand cmd){        // Redirección de entrada
     char* redir_input = scommand_get_redir_in(cmd);
     
     if (redir_input != NULL){
@@ -27,14 +29,16 @@ static void filedesc_redir_input(scommand cmd){
     }
 }
 
-static void filedesc_redir_output(scommand cmd){
+
+
+static void filedesc_redir_output(scommand cmd){      // Redirección de salida
     char* redir_output = scommand_get_redir_out(cmd);
     
     if (redir_output != NULL){                              
         int fd = open(redir_output,  O_WRONLY|O_CREAT|O_TRUNC, 0640);       // se usan los modos de acceso y un numero que indica los permisos
     
         if (fd == -1) {                       
-            perror("error: can'topen output");
+            perror("error: can't open output");
             exit(EXIT_FAILURE);
         }
         dup2(fd, STDOUT_FILENO);             
@@ -42,23 +46,27 @@ static void filedesc_redir_output(scommand cmd){
     }
 }
 
-static scommand copy_scommand(scommand sc) {
+
+
+static scommand copy_scommand(scommand sc) {            // hace una copia del scommand 
     scommand aux = scommand_new();
     unsigned int n = scommand_length(sc);
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < n; i++) {              
         char *arg = scommand_front(sc);
         scommand_push_back(aux, strdup(arg)); // duplicamos el string
         scommand_pop_front(sc);
     }
 
-    if (scommand_get_redir_in(sc))
+    if (scommand_get_redir_in(sc))                                    //revisa si tiene redirección
         scommand_set_redir_in(aux, strdup(scommand_get_redir_in(sc)));
+        
     if (scommand_get_redir_out(sc))
         scommand_set_redir_out(aux, strdup(scommand_get_redir_out(sc)));
 
     return aux;
 }
+
 
 
 void execute_pipeline(pipeline apipe) {
@@ -150,9 +158,11 @@ void execute_pipeline(pipeline apipe) {
 
     if (pipeline_get_wait(apipe)) {                                                 // Caso: ejecución en foreground (sin '&') 
         for (unsigned int i = 0; i < apipe_length; i++) {
-            int status;
-            waitpid(hijos[i], &status, 0);
+            waitpid(hijos[i], NULL, 0);
         }
+    } else {                                 // caso: background. la señal SIGCHLD avisa al padre que terminó el proceso hijo
+        signal(SIGCHLD, SIG_IGN);           // SIG_IGN hace que al terminar, se borre de la tabla de procesos sin que el padre espere por el hijo
     }
     free(hijos);
 }
+

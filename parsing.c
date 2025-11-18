@@ -16,34 +16,43 @@ static scommand parse_scommand(Parser p) {
         arg_kind_t kind;
         char *arg = parser_next_argument(p, &kind);
 
-        if (arg == NULL) {                          // Encontró '|' o '\n' y NO los consumió: acá termina este scommand
-            finish = true;
-        } else if (kind == ARG_NORMAL) {
+        if (arg == NULL) {
+            if (kind == ARG_INPUT || kind == ARG_OUTPUT) {
+                error = true;
+            }else {
+                finish = true;
+            }
+            continue;
+        
+        }else if (kind == ARG_NORMAL) {
             if (sc == NULL) {sc = scommand_new();}
             scommand_push_back(sc, arg);
             have_word = true;
         } else if (kind == ARG_INPUT) {
-            if (sc == NULL) { 
-                error = true; free(arg); 
-            }
-            else if (scommand_get_redir_in(sc) != NULL) {
-                error = true; free(arg); 
-                }
-            else { 
-                scommand_set_redir_in(sc, arg); 
-            }
-        } else if (kind == ARG_OUTPUT) {
-            if (sc == NULL) {
+            if (sc == NULL) {                  // '<' antes del comando
                 error = true;
-                free(arg); 
+                free(arg);
+                break;                          // ← cortar
             }
-            else if (scommand_get_redir_out(sc) != NULL) {
+            if (scommand_get_redir_in(sc) != NULL) {
+                error = true;                   // doble '<'
+                free(arg);
+                break;                          // ← cortar
+            }
+            else {scommand_set_redir_in(sc, arg);}
+        }
+        else if (kind == ARG_OUTPUT) {
+            if (sc == NULL) {                   // '>' antes del comando
                 error = true;
-                free(arg); 
+                free(arg);
+                break;                          // ← cortar
             }
-            else {
-                scommand_set_redir_out(sc, arg); 
+            if (scommand_get_redir_out(sc) != NULL) {
+                error = true;                   // doble '>'
+                free(arg);
+                break;                          // ← cortar
             }
+            scommand_set_redir_out(sc, arg);
         }
     }
 
@@ -63,7 +72,16 @@ pipeline parse_pipeline(Parser p) {
     
     cmd = parse_scommand(p);
 
-    error = (cmd==NULL); 
+     if (cmd == NULL) {
+        // línea inválida (ej: "< in cat" o "ls >")
+        if (!parser_at_eof(p)) {
+            bool gar = false;
+            parser_garbage(p, &gar);   // come hasta '\n' para no dejar restos
+        }
+        fprintf(stderr, "mybash: error de sintaxis\n");
+        return NULL;
+    }
+    
     while (another_pipe && !error) {
         pipeline_push_back(result, cmd);        // 1) guardar el comando actual en el pipeline 
         parser_op_pipe(p, &another_pipe);       // 2) ver si hay otro '|' y consumirlo si existe 
@@ -83,6 +101,7 @@ pipeline parse_pipeline(Parser p) {
         bool gar = false;
         parser_garbage(p, &gar);
         if(gar) {
+            fprintf(stderr, "mybash: error de sintaxis\n");
             error = true;
         }
     }

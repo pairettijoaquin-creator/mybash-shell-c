@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "command.h"
 #include "execute.h"
@@ -11,11 +12,29 @@
 
 
 static void show_prompt(void) {
-    printf ("mybash> ");
+    char path[1000];
+    if(getcwd(path, sizeof(path)) == NULL){
+        perror("getcwd() error");
+    } 
+
+    printf ("mybash> %s:\033[34m%s$ \033[0m",getenv("USER"), path);
     fflush (stdout);
 }
 
 int main(int argc, char *argv[]) {
+
+    printf("\n██████   ██████               ███████████                    █████     \n");
+    printf("░██████ ██████               ░░███░░░░░███                  ░░███      \n"); 
+    printf("░███░█████░███  █████ ████    ░███    ░███  ██████    █████  ░███████  \n");
+    printf("░███░░███ ░███ ░░███ ░███     ░██████████  ░░░░░███  ███░░   ░███░░███  \n");
+    printf("░███ ░░░  ░███  ░███ ░███     ░███░░░░░███  ███████ ░░█████  ░███ ░███ \n");
+    printf("░███      ░███  ░███ ░███     ░███    ░███ ███░░███  ░░░░███ ░███ ░███ \n");
+    printf("█████     █████ ░░███████     ███████████ ░░████████ ██████  ████ █████\n");
+    printf("░░░░░     ░░░░░   ░░░░░███    ░░░░░░░░░░░   ░░░░░░░░ ░░░░░░  ░░░░ ░░░░░ \n");
+    printf("                  ███ ░███                                              \n");
+    printf("                 ░░██████                                               \n");
+    printf("                  ░░░░░░                                                \n\n\n\n\n\n");
+
     pipeline pipe;
     Parser input;
     bool quit = false;
