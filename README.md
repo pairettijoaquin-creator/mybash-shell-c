@@ -1,78 +1,60 @@
-# MyBash - Shell en C
+# MyBash — A Unix Shell Implementation in C
 
-## 1. Instrucciones de Compilación y Ejecución
+A POSIX-like shell built from scratch in C, supporting pipelines, I/O redirection, background execution, and built-in commands. Developed as a systems programming project for an Operating Systems course.
 
-Para compilar el proyecto, ejecutar en la terminal:
+## Features
+
+- **Pipelines** — chain commands with `|`, connecting stdout/stdin across processes
+- **I/O redirection** — `<` and `>` for input/output redirection per command
+- **Background execution** — `&` to run pipelines without blocking the shell
+- **Built-in commands** — `cd`, `exit`, `help`, handled internally without forking
+- **Process management** — fork/exec/wait orchestration with zombie process cleanup
+- **Custom lexer/parser** — tokenizes and builds the pipeline structure from raw input
+
+## Architecture
+
+| File | Responsibility |
+|---|---|
+| `mybash.c` | Entry point, REPL loop, prompt rendering |
+| `parsing.c` / `parser.h` | Tokenizes user input and builds the pipeline structure |
+| `command.c` | Core data structures: `scommand` (simple command) and `pipeline` |
+| `execute.c` | Process orchestration: forking, piping, redirection, waiting |
+| `builtin.c` | Internal command implementations (`cd`, `exit`, `help`) |
+| `strextra.c` | String utility helpers used across modules |
+
+The lexer/parser core is precompiled per architecture (`objects-x86_64/`, `objects-i386/`) and linked at build time.
+
+## Build & Run
+
+Requires `gcc` and `glib-2.0`.
 
 ```bash
-make
+make          # builds the ./mybash binary
+./mybash      # starts the shell
 ```
 
-Para correr el shell:
+## Testing
+
+The project includes a test suite covering parsing, pipelines, and command execution, with syscalls mocked to test process logic in isolation, plus memory-leak checks via Valgrind.
 
 ```bash
-./mybash
+make test       # run the test suite
+make memtest    # run tests under Valgrind to catch leaks
 ```
----
 
-## 2. Descripción de Archivos Principales:
+## About This Project
 
-- **`command.c`**: Manejo de comandos individuales (agregado, acceso, destrucción, etc.).
-- **`execute.c`**: Lógica de ejecución de los comandos, redirecciones, pipes y procesos.
-- **`parsing.c`**: Parsing del input del usuario, separación por tokens, construcción del pipeline.
-- **`builtin.c`**: Implementación de comandos internos (`cd`, `exit`, `help`).
-- **`mybash.c`**: Punto de entrada del programa (`main()`), loop principal de lectura y ejecución.
+This was a **team project for the Operating Systems course at FaMAF (Facultad de Matemática, Astronomía, Física y Computación), Universidad Nacional de Córdoba (UNC)**, built by 4 students over several work branches with cross-review between members. Each module had a primary author and, in most cases, a collaborator who helped debug and refine the implementation:
 
----
+| Module | Author(s) | Collaborator(s) |
+|---|---|---|
+| `command` | Lissandro Bosque, Franco Galassi, Máximo Ortega, Joaquín Pairetti | — |
+| `parsing` | Máximo Ortega, Joaquín Pairetti | — |
+| `execute` | Lissandro Bosque | Franco Galassi |
+| `builtin` | Franco Galassi | Joaquín Pairetti |
+| Documentation | Joaquín Pairetti | — |
+| Demo video | Franco Galassi | — |
 
-## 3. Metodología de Trabajo en Equipo
+**Team:** Joaquín Pairetti · Máximo Ortega · Franco Galassi · Lissandro Bosque
 
-### Integrantes
-
-- **Joaquín Pairetti**
-- **Máximo Ortega**
-- **Franco Galassi**
-- **Lissandro Bosque**
-
-### El grupo se organizó dividiendo tareas en ramas específicas. Nos referiremos a creador, como el principal autor de la estructura del modulo, y colaborador como la persona que ayudo con la implementacionde dicho modulo (resolviendo problemas, depurando, etc):
-- Modulo Command:
-    - Creadores: Lissandro Bosque, Franco galassi, Maximo Ortega, Joaquin Pairetti  
-- Modulo Parsing: 
-    - creadores: Maximo Ortega, Joaquin Pairetti 
-- Modulo Execute:
-    - creadores: Lissandro Bosque
-    - colaborador: Franco Galassi
-- Modulo Builtin: 
-    - creadores: Franco Galassi
-    - colaboradores: Joaquin Pairetti
-- Documentación:
-    - creadores: Joaquin Pairetti 
-- Video: 
-    - creadores: Franco Galassi
-
-### El trabajo se distribuyó equitativamente y se integró con revisión cruzada entre los integrantes.
-
----
-
-## 4. Uso de Asistentes de IA
-
-Principal uso:
-- Depuracion de dudas teoricas:
-    - Syscall 
-    - Procesos
-    - Facilitar la compresion de consignas (Ejemplo: Entender el comportamiento de funciones) 
-- Depuracion de dudas de la implementacion:
-    - Manejo de memoria y punteros
-    - Glib y otras librerias
-- Entendimiento de errores que surgian, con el fin de facilitar su correcion, Ejemplos:
-    - Depuracion de parse_command, Error: no tomaba correctamente los argumentos
-    - Depuracion de scommand_set_redir_out/out, Error: mal manejo de memoria
-- **`conclusion`**: Fue de gran utilidad para agilizar el tratamiento de errores y amenizar el entendimiento del material teorico, nos enfocamos en un uso  responsable de la herramienta, porque sabemos que su uso abusivo convierte soluciones en problemas.  
-
----
-
-## 5. Enlace al Video
-
-👉 [Ver video de demostración](https://www.youtube.com/watch?v=DDv3d7gQj98)
-
----
+AI assistance was used responsibly during development — mainly to clarify OS theory (syscalls, processes), debug memory/pointer issues, and understand `glib` APIs — rather than to generate the implementation outright.
